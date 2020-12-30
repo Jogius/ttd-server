@@ -1,20 +1,41 @@
 {
   "name": "ttd-server",
   "version": "0.1.0",
+  "private": true,
   "main": "src/",
   "repository": "git@github.com:Jogius/ttd-server.git",
   "author": "Jogius <jogius.julius.makowski@gmail.com>",
   "license": "MIT",
   "scripts": {
     "start": "node src/",
-    "dev": "nodemon src/"
+    "dev": "nodemon src/",
+    "lint": "eslint --ext .js --ignore-path .gitignore ."
+  },
+  "lint-staged": {
+    "*.js": "eslint"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   },
   "dependencies": {
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
     "ini": "^2.0.0",
-    "socket.io": "^3.0.4"
+    "knex": "^0.21.15",
+    "socket.io": "^3.0.4",
+    "sqlite3": "^5.0.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "eslint": "^7.16.0",
-    "nodemon": "^2.0.6"
+    "eslint-config-prettier": "^7.1.0",
+    "eslint-plugin-prettier": "^3.3.0",
+    "husky": "^4.3.6",
+    "lint-staged": "^10.5.3",
+    "nodemon": "^2.0.6",
+    "prettier": "^2.2.1"
   }
 }

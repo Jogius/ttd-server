@@ -3,3 +3,9 @@
 
 # config
 CONFIG.ini
+
+# Database directory
+db/
+
+# logs
+*.log
