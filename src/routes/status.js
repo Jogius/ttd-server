@@ -14,12 +14,12 @@ router.get('/', async (req, res) => {
 
 router.post('/start', async (req, res) => {
   await knex('status').update({ started: true })
-  res.status(200)
+  res.json()
 })
 
 router.post('/stop', async (req, res) => {
   await knex('status').update({ started: false })
-  res.status(200)
+  res.json()
 })
 
 module.exports = router
