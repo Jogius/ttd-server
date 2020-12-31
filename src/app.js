@@ -7,10 +7,7 @@ app.disable('x-powered-by')
 
 // express middleware
 const cors = require('cors')
-app.use(cors({ origin: config.ORIGIN, credentials: true }))
-
-const cookieParser = require('cookie-parser')
-app.use(cookieParser(config.COOKIE_SECRET))
+app.use(cors({ origin: config.ORIGIN }))
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
