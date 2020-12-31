@@ -13,7 +13,10 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 // express routes
-const createRouter = require('./routes/create')
-app.use('/create', createRouter)
+const authRouter = require('./routes/auth')
+app.use('/auth', authRouter)
+
+const statusRouter = require('./routes/status')
+app.use('/status', statusRouter)
 
 module.exports = app

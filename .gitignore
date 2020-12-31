@@ -9,3 +9,6 @@ db/
 
 # logs
 *.log
+
+# development tools
+requests.http
