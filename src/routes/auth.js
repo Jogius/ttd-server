@@ -6,7 +6,7 @@ const knex = require('../knex')
 router.post('/create', async (req, res) => {
   const token = uuid.v4()
   const username = req.body.username.toLowerCase()
-  await knex('users').insert({
+  await knex('user').insert({
     username,
     token,
   })
@@ -15,7 +15,7 @@ router.post('/create', async (req, res) => {
 
 router.post('/join', async (req, res) => {
   const token = req.body.token
-  const username = await knex('users').where({ token }).first('username')
+  const username = await knex('user').where({ token }).first('username')
   res.json({ token, username })
 })
 
