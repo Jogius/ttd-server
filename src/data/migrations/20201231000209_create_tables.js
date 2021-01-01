@@ -14,6 +14,17 @@ exports.up = async (knex) => {
     await knex.schema.createTable('user', (table) => {
       table.uuid('user_token').notNullable().primary()
       table.string('username', 30).notNullable()
+      table.uuid('bot_token').notNullable()
+    })
+  }
+
+  if (!(await knex.schema.hasTable('message'))) {
+    await knex.schema.createTable('message', (table) => {
+      table.increments('id')
+      table.uuid('user_token').notNullable()
+      table.foreign('user_token').references('user_token').inTable('user')
+      table.string('content', 160).notNullable()
+      table.boolean('botChat').defaultTo(false)
     })
   }
 }
