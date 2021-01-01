@@ -1,11 +1,6 @@
-const fs = require('fs')
 const path = require('path')
 
-const config = require('ini').parse(
-  fs.readFileSync(path.resolve(__dirname, '..', 'CONFIG.ini'), 'utf-8')
-)
-
-config.knexConfig = {
+const knexConfig = {
   client: 'sqlite',
   connection: {
     filename: path.resolve(__dirname, '..', 'db', 'data.sqlite'),
@@ -21,4 +16,4 @@ config.knexConfig = {
   },
 }
 
-module.exports = config
+module.exports = knexConfig

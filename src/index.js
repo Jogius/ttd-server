@@ -1,5 +1,3 @@
-const config = require('./config')
-
 // Import express app
 const app = require('./app')
 
@@ -33,4 +31,4 @@ const migrate = async () => {
 migrate()
 
 // Start http server
-server.listen(config.PORT)
+server.listen(process.env.PORT)

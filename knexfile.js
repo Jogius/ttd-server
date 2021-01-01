@@ -1,2 +1,2 @@
-const knexConfig = require('./src/config').knexConfig
+const knexConfig = require('./src/knexConfig').knexConfig
 module.exports = knexConfig
