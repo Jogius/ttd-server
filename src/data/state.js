@@ -1,7 +1,1 @@
-module.exports = {
-  sockets: {},
-  userSockets: {},
-  partners: {},
-  users: {},
-  userTokens: [],
-}
+module.exports = { user: {} }

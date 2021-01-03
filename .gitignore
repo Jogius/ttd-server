@@ -1,8 +1,12 @@
 # dependencies
 /node_modules
 
+# python dependencies
+/src/chatbot/venv
+/src/chatbot/data/db
+
 # Database directory
-db/
+/db
 
 # logs
 *.log

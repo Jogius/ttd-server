@@ -2,7 +2,7 @@ const uuid = require('uuid')
 
 const knex = require('./knex')
 const state = require('./data/state')
-const chatNumber = require('./util/chatNumber')
+const generateChatNumber = require('./util/generateChatNumber')
 
 module.exports = async (socket) => {
   const status = await knex('status').first([
@@ -17,41 +17,65 @@ module.exports = async (socket) => {
     console.log(`event: ${event}\n  args: ${args}`)
   })
 
-  socket.on('auth/create', async (unprocessedUsername) => {
+  socket.on('auth/create', async (unprocessedUsername, callback) => {
     const userToken = uuid.v4()
     const username = unprocessedUsername.toLowerCase()
     await knex('user').insert({
       userToken,
       username,
-      chatNumber: chatNumber(),
+      userChatNumber: generateChatNumber(),
     })
+    socket.userToken = userToken
 
-    state.userSockets[userToken] = state.sockets[socket.id]
-    delete state.sockets[socket.id]
-
-    socket.emit('auth/login', {
-      username,
-      userToken,
-    })
+    callback(username, userToken)
   })
-  socket.on('auth/join', async (userToken) => {
+  socket.on('auth/join', async (userToken, callback) => {
     const { username } = await knex('user')
       .where('userToken', userToken)
       .first('username')
 
-    state.userSockets[userToken] = state.sockets[socket.id]
-    delete state.sockets[socket.id]
-
-    socket.emit('auth/login', {
-      username,
-      userToken,
-    })
+    callback(username, userToken)
   })
 
-  socket.on('auth/newSocket', (userToken) => {
-    state.userSockets[userToken] = socket
+  socket.on('chat1/message', async ({ message, userToken }) => {
+    const { userRoomId, userChatNumber } = await knex('user')
+      .where('userToken', userToken)
+      .first('userRoomId', 'userChatNumber')
+
+    if (userChatNumber === 1) {
+      const recipientUserChatNumber = (
+        await knex('user')
+          .where('userRoomId', userRoomId)
+          .andWhereNot('userToken', userToken)
+          .first('userChatNumber')
+      ).userChatNumber
+      socket
+        .to(userRoomId)
+        .emit(`chat${recipientUserChatNumber}/message`, message)
+    } else if (userChatNumber === 2) {
+      console.log('Bot has to answer, sending placeholder')
+      socket.emit('chat1/message', 'I am not a bot!')
+    }
   })
-  socket.on('auth/newConnection', () => {
-    state.sockets[socket.id] = socket
+
+  socket.on('chat2/message', async ({ message, userToken }) => {
+    const { userRoomId, userChatNumber } = await knex('user')
+      .where('userToken', userToken)
+      .first('userRoomId', 'userChatNumber')
+
+    if (userChatNumber === 2) {
+      const recipientUserChatNumber = (
+        await knex('user')
+          .where('userRoomId', userRoomId)
+          .andWhereNot('userToken', userToken)
+          .first('userChatNumber')
+      ).userChatNumber
+      socket
+        .to(userRoomId)
+        .emit(`chat${recipientUserChatNumber}/message`, message)
+    } else if (userChatNumber === 1) {
+      console.log('Bot has to answer, sending placeholder')
+      socket.emit('chat2/message', 'I am not a bot!')
+    }
   })
 }

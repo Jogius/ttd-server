@@ -12,19 +12,32 @@ exports.up = async (knex) => {
 
   if (!(await knex.schema.hasTable('user'))) {
     await knex.schema.createTable('user', (table) => {
-      table.uuid('user_token').notNullable().primary()
+      table.uuid('userToken').notNullable().primary()
       table.string('username', 30).notNullable()
-      table.uuid('bot_token').notNullable()
+      table.integer('userChatNumber', 1).notNullable()
+      table.uuid('userRoomId')
+      // table.uuid('botRoomId')
     })
   }
 
-  if (!(await knex.schema.hasTable('message'))) {
-    await knex.schema.createTable('message', (table) => {
+  if (!(await knex.schema.hasTable('userRoomMessage'))) {
+    await knex.schema.createTable('userRoomMessage', (table) => {
       table.increments('id')
-      table.uuid('user_token').notNullable()
-      table.foreign('user_token').references('user_token').inTable('user')
+      table.uuid('authorToken').notNullable()
+      table.foreign('authorToken').references('userToken').inTable('user')
+      table.uuid('roomId')
+      table.foreign('roomId').references('userRoomId').inTable('user')
       table.string('content', 160).notNullable()
-      table.boolean('botChat').defaultTo(false)
+    })
+  }
+
+  if (!(await knex.schema.hasTable('botRoomMessage'))) {
+    await knex.schema.createTable('botRoomMessage', (table) => {
+      table.increments('id')
+      table.boolean('bot').defaultTo(false)
+      table.uuid('userId').notNullable()
+      table.foreign('userId').references('userId').inTable('user')
+      table.string('content', 160).notNullable()
     })
   }
 }
