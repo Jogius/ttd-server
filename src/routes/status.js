@@ -1,17 +1,15 @@
 const router = require('express').Router()
 
 const knex = require('../knex')
-const state = require('../data/state')
 const connectSockets = require('../connectSockets')
 
 router.get('/', async (req, res) => {
-  // console.log(state)
   res.json()
 })
 
 router.post('/start', async (req, res) => {
+  if (!(await connectSockets())) return res.json()
   await knex('status').update({ started: true })
-  await connectSockets()
   const userNamespace = req.app.get('userNamespace')
 
   const users = await knex('user').select('userToken', 'userRoomId')

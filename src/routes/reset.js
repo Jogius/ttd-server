@@ -1,7 +1,6 @@
 const router = require('express').Router()
 
 const knex = require('../knex')
-const state = require('../data/state')
 
 router.post('/all', async (req, res) => {
   await knex('status').update({

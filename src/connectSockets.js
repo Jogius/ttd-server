@@ -1,7 +1,6 @@
 const uuid = require('uuid')
 
 const knex = require('./knex')
-const state = require('./data/state')
 const shuffle = require('./util/shuffle')
 
 module.exports = async () => {
@@ -13,6 +12,7 @@ module.exports = async () => {
   }
 
   userTokens = shuffle(userTokens)
+  if (userTokens.length <= 1) return false
   for (var i = 0; i < userTokens.length; i++) {
     if (i % 2 === 0) {
       const userRoomId = uuid.v4()
@@ -22,4 +22,5 @@ module.exports = async () => {
         .update('userRoomId', userRoomId)
     }
   }
+  return true
 }

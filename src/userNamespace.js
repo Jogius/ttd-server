@@ -1,7 +1,6 @@
 const uuid = require('uuid')
 
 const knex = require('./knex')
-const state = require('./data/state')
 const generateChatNumber = require('./util/generateChatNumber')
 
 module.exports = async (socket) => {
