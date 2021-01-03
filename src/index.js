@@ -1,34 +1,34 @@
-// Import express app
-const app = require('./app')
+const express = require('express')
 
-// Create http server for socket.io
+const app = express()
+app.disable('x-powered-by')
+
+const cors = require('cors')
+app.use(cors({ origin: process.env.ORIGIN }))
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+const resetRouter = require('./routes/reset')
+app.use('/reset', resetRouter)
+
+const statusRouter = require('./routes/status')
+app.use('/status', statusRouter)
+
 const server = require('http').createServer(app)
 
-// Instantiate socket.io server
-const io = require('socket.io')(server)
-
-io.on('connection', (socket) => {
-  socket.send('Hello!')
-
-  socket.on('message', (msg) => {
-    console.log(msg)
-  })
-
-  socket.onAny((event, ...args) => {
-    console.log(`event: ${event}\nargs: ${args}`)
-  })
+const io = require('socket.io')(server, {
+  cors: {
+    origin: process.env.ORIGIN,
+  },
 })
 
-const knex = require('./knex')
-const migrate = async () => {
-  const [completed, newMigrations] = await knex.migrate.list()
-  if (newMigrations.length > 0) {
-    console.log('[DB MESSAGE] Updating database')
-    await knex.migrate.latest()
-    console.log('[DB MESSAGE] Done!')
-  }
-}
-migrate()
+const handleUserNamespaceConnection = require('./userNamespace')
+const userNamespace = io.of('/user')
+userNamespace.on('connection', async (socket) =>
+  handleUserNamespaceConnection(socket)
+)
 
-// Start http server
+app.set('userNamespace', userNamespace)
+
 server.listen(process.env.PORT)
