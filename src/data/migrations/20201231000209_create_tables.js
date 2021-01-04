@@ -35,8 +35,8 @@ exports.up = async (knex) => {
     await knex.schema.createTable('botRoomMessage', (table) => {
       table.increments('id')
       table.boolean('bot').defaultTo(false)
-      table.uuid('userId').notNullable()
-      table.foreign('userId').references('userId').inTable('user')
+      table.uuid('userToken').notNullable()
+      table.foreign('userToken').references('userToken').inTable('user')
       table.string('content', 160).notNullable()
     })
   }
