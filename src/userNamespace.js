@@ -1,6 +1,7 @@
 const uuid = require('uuid')
 
 const knex = require('./knex')
+const { newBot, getAnswer } = require('./chatbotHandler')
 const generateChatNumber = require('./util/generateChatNumber')
 
 module.exports = async (socket) => {
@@ -25,6 +26,7 @@ module.exports = async (socket) => {
       userChatNumber: generateChatNumber(),
     })
     socket.userToken = userToken
+    newBot(userToken)
 
     callback(username, userToken)
   })
@@ -32,49 +34,96 @@ module.exports = async (socket) => {
     const { username } = await knex('user')
       .where('userToken', userToken)
       .first('username')
+    socket.userToken = userToken
 
     callback(username, userToken)
   })
 
-  socket.on('chat1/message', async ({ message, userToken }) => {
-    const { userRoomId, userChatNumber } = await knex('user')
+  socket.on('auth/newSocket', async (userToken) => {
+    const { userRoomId } = await knex('user')
       .where('userToken', userToken)
-      .first('userRoomId', 'userChatNumber')
+      .first('userRoomId')
+    socket.userToken = userToken
+    socket.join(userRoomId)
+  })
 
-    if (userChatNumber === 1) {
+  socket.on('chat1/message', async ({ message, userToken }) => {
+    if (
+      !socket.userRoomId ||
+      !socket.userChatNumber ||
+      !socket.recipientUserChatNumber
+    ) {
+      const { userRoomId, userChatNumber } = await knex('user')
+        .where('userToken', userToken)
+        .first('userRoomId', 'userChatNumber')
       const recipientUserChatNumber = (
         await knex('user')
           .where('userRoomId', userRoomId)
           .andWhereNot('userToken', userToken)
           .first('userChatNumber')
       ).userChatNumber
+      socket.userRoomId = userRoomId
+      socket.userChatNumber = userChatNumber
+      socket.recipientUserChatNumber = recipientUserChatNumber
+    }
+
+    if (socket.userChatNumber === 1) {
+      await knex('userRoomMessage').insert({
+        authorToken: socket.userToken,
+        roomId: socket.userRoomId,
+        content: message,
+      })
       socket
-        .to(userRoomId)
-        .emit(`chat${recipientUserChatNumber}/message`, message)
-    } else if (userChatNumber === 2) {
-      console.log('Bot has to answer, sending placeholder')
-      socket.emit('chat1/message', 'I am not a bot!')
+        .to(socket.userRoomId)
+        .emit(`chat${socket.recipientUserChatNumber}/message`, message)
+    } else if (socket.userChatNumber === 2) {
+      await knex('botRoomMessage').insert({
+        userToken: socket.userToken,
+        content: message,
+      })
+      getAnswer(socket.userToken, message, (answer) => {
+        socket.emit('chat1/message', answer)
+      })
     }
   })
 
   socket.on('chat2/message', async ({ message, userToken }) => {
-    const { userRoomId, userChatNumber } = await knex('user')
-      .where('userToken', userToken)
-      .first('userRoomId', 'userChatNumber')
-
-    if (userChatNumber === 2) {
+    if (
+      !socket.userRoomId ||
+      !socket.userChatNumber ||
+      !socket.recipientUserChatNumber
+    ) {
+      const { userRoomId, userChatNumber } = await knex('user')
+        .where('userToken', userToken)
+        .first('userRoomId', 'userChatNumber')
       const recipientUserChatNumber = (
         await knex('user')
           .where('userRoomId', userRoomId)
           .andWhereNot('userToken', userToken)
           .first('userChatNumber')
       ).userChatNumber
+      socket.userRoomId = userRoomId
+      socket.userChatNumber = userChatNumber
+      socket.recipientUserChatNumber = recipientUserChatNumber
+    }
+
+    if (socket.userChatNumber === 2) {
+      await knex('userRoomMessage').insert({
+        authorToken: socket.userToken,
+        roomId: socket.userRoomId,
+        content: message,
+      })
       socket
-        .to(userRoomId)
-        .emit(`chat${recipientUserChatNumber}/message`, message)
-    } else if (userChatNumber === 1) {
-      console.log('Bot has to answer, sending placeholder')
-      socket.emit('chat2/message', 'I am not a bot!')
+        .to(socket.userRoomId)
+        .emit(`chat${socket.recipientUserChatNumber}/message`, message)
+    } else if (socket.userChatNumber === 1) {
+      await knex('botRoomMessage').insert({
+        userToken: socket.userToken,
+        content: message,
+      })
+      getAnswer(socket.userToken, message, (answer) => {
+        socket.emit('chat2/message', answer)
+      })
     }
   })
 }
