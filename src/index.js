@@ -15,7 +15,13 @@ app.use('/reset', resetRouter)
 const statusRouter = require('./routes/status')
 app.use('/status', statusRouter)
 
-const server = require('http').createServer(app)
+const fs = require('fs')
+const options = {
+  key: fs.readFileSync(process.env.PRIVKEY),
+  cert: fs.readFileSync(process.env.CERT),
+}
+
+const server = require('https').createServer(options, app)
 
 const io = require('socket.io')(server, {
   cors: {
