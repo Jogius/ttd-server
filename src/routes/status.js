@@ -3,10 +3,6 @@ const router = require('express').Router()
 const knex = require('../knex')
 const connectSockets = require('../connectSockets')
 
-router.get('/', async (req, res) => {
-  res.json()
-})
-
 router.post('/start', async (req, res) => {
   if (!(await connectSockets())) return res.json()
   await knex('status').update({ started: true })
