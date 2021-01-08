@@ -10,6 +10,7 @@ module.exports = async (socket) => {
     'chatting',
     'voting',
     'results',
+    'sessionToken',
   ])
   socket.emit('status', status)
 

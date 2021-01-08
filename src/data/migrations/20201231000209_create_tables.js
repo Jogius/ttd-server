@@ -6,6 +6,7 @@ exports.up = async (knex) => {
       table.boolean('chatting').defaultTo(false)
       table.boolean('voting').defaultTo(false)
       table.boolean('results').defaultTo(false)
+      table.uuid('sessionToken')
     })
     await knex('status').insert({ lock: 'X' })
   }
