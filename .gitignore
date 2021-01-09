@@ -2,6 +2,7 @@
 /node_modules
 
 # python dependencies
+/src/chatbot/__pycache__
 /src/chatbot/venv
 /src/chatbot/data/db
 

@@ -7,7 +7,7 @@ const connectSockets = require('../connectSockets')
 
 router.post('/start', async (req, res) => {
   if (!(await connectSockets())) return res.json()
-  await knex('status').update({ started: true, sessionToken: uuid.v4() })
+  await knex('status').update({ started: true })
   const userNamespace = req.app.get('userNamespace')
 
   const users = await knex('user').select('userToken', 'userRoomId')
