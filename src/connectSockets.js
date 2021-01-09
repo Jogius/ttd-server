@@ -14,13 +14,20 @@ module.exports = async () => {
   userTokens = shuffle(userTokens)
   if (userTokens.length <= 1) return false
   for (var i = 0; i < userTokens.length; i++) {
-    if (i % 2 === 0) {
-      const userRoomId = uuid.v4()
+    if (i >= userTokens.length - (userTokens.length % 2 === 0 ? 2 : 1)) {
       await knex('user')
         .where('userToken', userTokens[i])
-        .orWhere('userToken', userTokens[i + 1])
-        .update('userRoomId', userRoomId)
+        .update('doubleBot', true)
+    } else {
+      if (i % 2 === 0) {
+        const userRoomId = uuid.v4()
+        await knex('user')
+          .where('userToken', userTokens[i])
+          .orWhere('userToken', userTokens[i + 1])
+          .update('userRoomId', userRoomId)
+      }
     }
   }
+
   return true
 }
